@@ -5,8 +5,17 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
-
 from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
+
+model = XGBRegressor(
+    n_estimators=3000,
+    learning_rate=0.01,
+    max_depth=3,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    random_state=42
+)
 
 
 pd.set_option('display.max_columns', None)
@@ -25,6 +34,16 @@ all_data = pd.concat(
 )
 train_rows = len(train)
 
+
+
+
+##欠損データの有効化
+all_data["GarageType"] = all_data["GarageType"].fillna("None")
+
+
+
+
+
 all_data = pd.get_dummies(all_data)
 
 
@@ -41,16 +60,40 @@ x_test = all_data.iloc[len(train):]
 ##print(missing[missing != 0])
 
 
+
+
+
+
+##特徴量エンジニアリング
+all_data["TotalSF"] = (
+    all_data["TotalBsmtSF"]
+    + all_data["1stFlrSF"]
+    + all_data["2ndFlrSF"]
+)
+
+all_data["HouseAge"] = (
+    all_data["YrSold"]
+    - all_data["YearBuilt"]
+)
+
+
+
+
+
+
+
+
+
 features = [
     "OverallQual",
-    "YearBuilt",
+    "HouseAge",
     "YearRemodAdd",
     "MasVnrArea",
-    "TotalBsmtSF",
-    "1stFlrSF",
+    "TotalSF",
     "GrLivArea",
     "TotRmsAbvGrd",
     "GarageCars",
+    "GarageType",
     "GarageArea",
     "OverallQual",
     "ExterQual",
@@ -60,11 +103,12 @@ features = [
 ]
 
 y = np.log1p(train["SalePrice"])
-
+"""
 model = RandomForestRegressor(
     n_estimators=100,
     random_state=42
 )
+"""
 
 model.fit(
     x,
@@ -83,3 +127,19 @@ submission.to_csv(
     "submission.csv",
     index=False
 )
+
+
+
+
+
+##検証
+
+scores = cross_val_score(
+    model,
+    x,
+    y,
+    cv=5,
+    scoring="neg_root_mean_squared_error"
+)
+
+print(-scores.mean())
