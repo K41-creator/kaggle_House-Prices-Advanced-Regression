@@ -44,23 +44,6 @@ all_data["GarageType"] = all_data["GarageType"].fillna("None")
 
 
 
-all_data = pd.get_dummies(all_data)
-
-
-pd.set_option('display.max_columns', None)
-train = pd.read_csv("train.csv")
-test = pd.read_csv("test.csv")
-
-x = all_data.iloc[:len(train)]
-x_test = all_data.iloc[len(train):]
-
-
-
-##missing = train.isnull().sum()
-##print(missing[missing != 0])
-
-
-
 
 
 
@@ -80,6 +63,23 @@ all_data["HouseAge"] = (
 
 
 
+
+
+
+all_data = pd.get_dummies(all_data)
+
+
+pd.set_option('display.max_columns', None)
+train = pd.read_csv("train.csv")
+test = pd.read_csv("test.csv")
+
+x = all_data.iloc[:len(train)]
+x_test = all_data.iloc[len(train):]
+
+
+
+##missing = train.isnull().sum()
+##print(missing[missing != 0])
 
 
 
